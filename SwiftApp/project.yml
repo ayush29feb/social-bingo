@@ -5,6 +5,11 @@ options:
   xcodeVersion: "16"
   createIntermediateGroups: true
 
+packages:
+  Supabase:
+    url: https://github.com/supabase/supabase-swift
+    from: 2.0.0
+
 targets:
   SocialBingo:
     type: application
@@ -18,6 +23,9 @@ targets:
         UILaunchStoryboardName: ""
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
+    dependencies:
+      - package: Supabase
+        product: Supabase
     settings:
       base:
         SWIFT_VERSION: 5.9
