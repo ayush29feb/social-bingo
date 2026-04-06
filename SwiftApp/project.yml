@@ -2,7 +2,7 @@ name: SocialBingo
 options:
   deploymentTarget:
     iOS: "17.0"
-  xcodeVersion: "15"
+  xcodeVersion: "16"
   createIntermediateGroups: true
 
 targets:
@@ -35,3 +35,22 @@ targets:
       base:
         SWIFT_VERSION: 5.9
         PRODUCT_BUNDLE_IDENTIFIER: com.example.SocialBingoTests
+
+schemes:
+  SocialBingo:
+    build:
+      targets:
+        SocialBingo: all
+        SocialBingoTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - SocialBingoTests
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
