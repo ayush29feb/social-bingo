@@ -75,9 +75,9 @@ struct ItemSheetView: View {
                 .padding(.vertical, 4)
             }
 
-            if !item.url.isEmpty {
+            if !item.url.isEmpty, let destination = URL(string: item.url) {
                 Section("Link") {
-                    Link(item.url, destination: URL(string: item.url) ?? URL(string: "https://example.com")!)
+                    Link(item.url, destination: destination)
                         .font(.subheadline)
                 }
             }
@@ -141,10 +141,7 @@ struct ItemSheetView: View {
     private func prefill() {
         switch mode {
         case .create:
-            emoji = ""
-            title = ""
-            description = ""
-            url = ""
+            break  // state fields already default to ""
         case .edit(let item):
             emoji = item.emoji
             title = item.title
