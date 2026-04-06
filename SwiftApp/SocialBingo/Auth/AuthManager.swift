@@ -41,7 +41,7 @@ final class AuthManager: NSObject, ObservableObject {
 
     // MARK: - Username generation (static for testability)
 
-    static func usernameFrom(appleName: PersonNameComponents?) -> String {
+    nonisolated static func usernameFrom(appleName: PersonNameComponents?) -> String {
         let raw = [appleName?.givenName, appleName?.familyName]
             .compactMap { $0 }
             .joined()

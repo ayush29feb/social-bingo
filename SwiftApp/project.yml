@@ -43,6 +43,7 @@ targets:
       base:
         SWIFT_VERSION: 5.9
         PRODUCT_BUNDLE_IDENTIFIER: com.example.SocialBingoTests
+        GENERATE_INFOPLIST_FILE: YES
 
 schemes:
   SocialBingo:
