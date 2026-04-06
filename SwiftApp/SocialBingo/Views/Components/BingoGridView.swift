@@ -10,10 +10,14 @@ struct BingoGridView: View {
         count: 5
     )
 
+    private var itemByPosition: [Int: BingoItem] {
+        items.reduce(into: [:]) { dict, item in dict[item.position] = item }
+    }
+
     var body: some View {
         LazyVGrid(columns: columns, spacing: 4) {
             ForEach(0..<25, id: \.self) { position in
-                let item = items.first { $0.position == position }
+                let item = itemByPosition[position]
                 BingoCellView(
                     item: item,
                     plusOneCount: plusOneCounts[position] ?? 0,
