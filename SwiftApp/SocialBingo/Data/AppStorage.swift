@@ -42,6 +42,14 @@ final class AppStorage: ObservableObject {
         persistItems()
     }
 
+    func resetForNewUser(user: User) {
+        defaults.removeObject(forKey: userKey)
+        defaults.removeObject(forKey: itemsKey)
+        currentUser = user
+        bingoItems = []
+        saveUser()
+    }
+
     func makeItem(position: Int, emoji: String, title: String,
                   description: String = "", url: String = "") -> BingoItem {
         BingoItem(

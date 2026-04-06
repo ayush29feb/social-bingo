@@ -103,4 +103,31 @@ final class StorageTests: XCTestCase {
         XCTAssertEqual(aCount, 1)
         XCTAssertEqual(bCount, 1)
     }
+
+    func test_resetForNewUser_clearsItems() {
+        let suite = UserDefaults(suiteName: "test_reset")!
+        let storage = AppStorage(defaults: suite)
+        let item = storage.makeItem(position: 0, emoji: "🎯", title: "Test")
+        storage.saveBingoItem(item)
+        XCTAssertFalse(storage.bingoItems.isEmpty)
+
+        let newUser = User(id: "real-uuid", username: "alice", avatarEmoji: "🌊", bio: "")
+        storage.resetForNewUser(user: newUser)
+
+        XCTAssertEqual(storage.currentUser.id, "real-uuid")
+        XCTAssertTrue(storage.bingoItems.isEmpty)
+        suite.removePersistentDomain(forName: "test_reset")
+    }
+
+    func test_resetForNewUser_persistsUser() {
+        let suite = UserDefaults(suiteName: "test_reset_persist")!
+        let storage = AppStorage(defaults: suite)
+        let newUser = User(id: "real-uuid-2", username: "bob", avatarEmoji: "😊", bio: "hello")
+        storage.resetForNewUser(user: newUser)
+
+        let storage2 = AppStorage(defaults: suite)
+        XCTAssertEqual(storage2.currentUser.id, "real-uuid-2")
+        XCTAssertEqual(storage2.currentUser.username, "bob")
+        suite.removePersistentDomain(forName: "test_reset_persist")
+    }
 }
