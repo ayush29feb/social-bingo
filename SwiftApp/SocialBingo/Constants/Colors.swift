@@ -8,5 +8,5 @@ extension Color {
     static let appMuted       = Color(red: 136/255, green: 136/255, blue: 136/255)
     static let appBorder      = Color(red: 224/255, green: 224/255, blue: 224/255)
     static let appPlusOne     = Color(red: 255/255, green: 107/255, blue: 107/255)
-    static let appPlusOneBg   = Color(red: 255/255, green: 240/255, blue: 240/255)
+    static let appPlusOneBg   = Color(red: 255/255, green: 240/255, blue: 240/255) // Reserved for plus-one row highlight (Supabase-era)
 }

@@ -19,7 +19,7 @@ struct ContentView: View {
                 .tabItem {
                     Label("Notifications", systemImage: "bell")
                 }
-                .badge(getUnreadCount()) // TODO: drive from @Published storage state in Task 14
+                .badge(getUnreadCount()) // Prototype: reads static mock; replace with @Published unreadCount on AppStorage when Supabase is integrated
         }
         .tint(.appPrimary)
     }

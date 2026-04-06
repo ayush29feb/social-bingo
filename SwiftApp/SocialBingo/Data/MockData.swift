@@ -38,6 +38,15 @@ let mockUsers: [User] = [
     User(id: "jordan", username: "jordan", avatarEmoji: "🌿", bio: "Nature lover"),
 ]
 
+// MARK: - Friendships (current user is friends with all mockUsers)
+
+let mockFriendships: [Friendship] = [
+    Friendship(id: "f-1", userAId: currentUserId, userBId: "alex"),
+    Friendship(id: "f-2", userAId: currentUserId, userBId: "maya"),
+    Friendship(id: "f-3", userAId: currentUserId, userBId: "sam"),
+    Friendship(id: "f-4", userAId: currentUserId, userBId: "jordan"),
+]
+
 // MARK: - Mock friend bingo items (25 per friend)
 
 let mockFriendItems: [String: [BingoItem]] = [
