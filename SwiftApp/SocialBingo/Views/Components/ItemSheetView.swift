@@ -179,3 +179,9 @@ struct ItemSheetView: View {
         dismiss()
     }
 }
+
+/// Thin Identifiable wrapper so ItemSheetMode can drive sheet(item:)
+struct IdentifiableSheetMode: Identifiable {
+    let id = UUID()
+    let mode: ItemSheetMode
+}

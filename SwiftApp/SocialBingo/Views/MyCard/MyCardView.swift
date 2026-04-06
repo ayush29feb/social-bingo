@@ -3,7 +3,7 @@ import SwiftUI
 struct MyCardView: View {
     @EnvironmentObject var storage: AppStorage
     @State private var showProfile = false
-    @State private var sheetMode: ItemSheetMode? = nil
+    @State private var sheetItem: IdentifiableSheetMode? = nil
 
     private var plusOneCounts: [Int: Int] {
         getPlusOneCounts(for: storage.bingoItems)
@@ -40,9 +40,9 @@ struct MyCardView: View {
                         plusOneCounts: plusOneCounts,
                         onCellTap: { position, item in
                             if let item {
-                                sheetMode = .edit(item: item)
+                                sheetItem = IdentifiableSheetMode(mode: .edit(item: item))
                             } else {
-                                sheetMode = .create(position: position)
+                                sheetItem = IdentifiableSheetMode(mode: .create(position: position))
                             }
                         }
                     )
@@ -66,24 +66,10 @@ struct MyCardView: View {
             .sheet(isPresented: $showProfile) {
                 ProfileView()
             }
-            .sheet(item: sheetModeBinding) { mode in
-                ItemSheetView(mode: mode.mode)
+            .sheet(item: $sheetItem) { item in
+                ItemSheetView(mode: item.mode)
                     .presentationDetents([.medium, .large])
             }
         }
     }
-
-    // Adapt Optional<ItemSheetMode> to sheet(item:) — requires Identifiable
-    private var sheetModeBinding: Binding<IdentifiableSheetMode?> {
-        Binding(
-            get: { sheetMode.map { IdentifiableSheetMode(mode: $0) } },
-            set: { sheetMode = $0?.mode }
-        )
-    }
-}
-
-/// Thin Identifiable wrapper so ItemSheetMode can drive sheet(item:)
-struct IdentifiableSheetMode: Identifiable {
-    let id = UUID()
-    let mode: ItemSheetMode
 }
