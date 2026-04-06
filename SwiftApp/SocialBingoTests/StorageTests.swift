@@ -21,7 +21,7 @@ final class StorageTests: XCTestCase {
     // MARK: - Default state
 
     func test_freshStorage_loadsDefaultUser() {
-        XCTAssertEqual(storage.currentUser.id, "current-user")
+        XCTAssertEqual(storage.currentUser.id, currentUserId)
         XCTAssertEqual(storage.currentUser.username, "you")
         XCTAssertEqual(storage.currentUser.avatarEmoji, "🎯")
     }

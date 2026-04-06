@@ -41,16 +41,17 @@ schemes:
     build:
       targets:
         SocialBingo: all
-        SocialBingoTests: [test]
     run:
       config: Debug
     test:
       config: Debug
       targets:
         - SocialBingoTests
-    profile:
-      config: Release
-    analyze:
+  SocialBingoTests:
+    build:
+      targets:
+        SocialBingoTests: [test]
+    test:
       config: Debug
-    archive:
-      config: Release
+      targets:
+        - SocialBingoTests
