@@ -19,7 +19,7 @@ struct ContentView: View {
                 .tabItem {
                     Label("Notifications", systemImage: "bell")
                 }
-                .badge(getUnreadCount() > 0 ? getUnreadCount() : 0)
+                .badge(getUnreadCount()) // TODO: drive from @Published storage state in Task 14
         }
         .tint(.appPrimary)
     }
