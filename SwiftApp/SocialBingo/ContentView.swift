@@ -2,8 +2,21 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var storage: AppStorage
+    @EnvironmentObject var authManager: AuthManager
 
     var body: some View {
+        Group {
+            if authManager.isLoading {
+                ProgressView()
+            } else if authManager.session == nil {
+                SignInView()
+            } else {
+                mainTabView
+            }
+        }
+    }
+
+    private var mainTabView: some View {
         TabView {
             MyCardView()
                 .tabItem {
@@ -19,7 +32,7 @@ struct ContentView: View {
                 .tabItem {
                     Label("Notifications", systemImage: "bell")
                 }
-                .badge(getUnreadCount()) // Prototype: reads static mock; replace with @Published unreadCount on AppStorage when Supabase is integrated
+                .badge(getUnreadCount())
         }
         .tint(.appPrimary)
     }
