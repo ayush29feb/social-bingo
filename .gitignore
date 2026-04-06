@@ -3,3 +3,4 @@
 # Xcode generated project (managed by XcodeGen)
 SwiftApp/*.xcodeproj/
 SwiftApp/*.xcworkspace/
+SwiftApp/SocialBingo/Info.plist
