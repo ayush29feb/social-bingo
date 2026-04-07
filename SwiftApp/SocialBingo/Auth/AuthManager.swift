@@ -1,5 +1,3 @@
-import AuthenticationServices
-import CryptoKit
 import Foundation
 import Supabase
 
@@ -9,81 +7,76 @@ final class AuthManager: NSObject, ObservableObject {
 
     @Published var session: Session?
     @Published var isLoading = true
-
-    private var currentNonce: String?
+    @Published var magicLinkSent = false
 
     override init() {
         super.init()
-        Task { await restoreSession() }
+        Task { await startAuthListener() }
     }
 
-    // MARK: - Session restore
+    // MARK: - Auth state listener
 
-    private func restoreSession() async {
+    private func startAuthListener() async {
         session = try? await supabase.auth.session
         isLoading = false
+
+        for await (event, session) in await supabase.auth.authStateChanges {
+            switch event {
+            case .signedIn:
+                self.session = session
+                self.magicLinkSent = false
+                if let session {
+                    await ensureUserProfile(session: session)
+                }
+            case .signedOut:
+                self.session = nil
+            default:
+                break
+            }
+        }
     }
 
-    // MARK: - Apple Sign-In
+    // MARK: - Magic link
 
-    func startAppleSignIn() {
-        let nonce = randomNonceString()
-        currentNonce = nonce
+    func sendMagicLink(email: String) async throws {
+        try await supabase.auth.signInWithOTP(
+            email: email,
+            redirectTo: URL(string: "socialbingo://login-callback")
+        )
+        magicLinkSent = true
+    }
 
-        let request = ASAuthorizationAppleIDProvider().createRequest()
-        request.requestedScopes = [.fullName, .email]
-        request.nonce = sha256(nonce)
-
-        let controller = ASAuthorizationController(authorizationRequests: [request])
-        controller.delegate = self
-        controller.performRequests()
+    func handleURL(_ url: URL) {
+        supabase.auth.handle(url)
     }
 
     // MARK: - Username generation (static for testability)
 
-    nonisolated static func usernameFrom(appleName: PersonNameComponents?) -> String {
-        let raw = [appleName?.givenName, appleName?.familyName]
-            .compactMap { $0 }
-            .joined()
-            .lowercased()
-            .filter { $0.isLetter || $0.isNumber }
-        let trimmed = String(raw.prefix(20))
+    nonisolated static func usernameFrom(email: String) -> String {
+        let prefix = email.components(separatedBy: "@").first ?? ""
+        let cleaned = prefix.lowercased().filter { $0.isLetter || $0.isNumber }
+        let trimmed = String(cleaned.prefix(20))
         return trimmed.isEmpty ? "user\(Int.random(in: 1000...9999))" : trimmed
     }
 
-    // MARK: - Private helpers
+    // MARK: - Profile creation
 
-    private func randomNonceString(length: Int = 32) -> String {
-        var bytes = [UInt8](repeating: 0, count: length)
-        _ = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
-        return bytes.map { String(format: "%02x", $0) }.joined()
-    }
-
-    private func sha256(_ input: String) -> String {
-        let data = Data(input.utf8)
-        let hash = SHA256.hash(data: data)
-        return hash.map { String(format: "%02x", $0) }.joined()
-    }
-
-    private func ensureUserProfile(userId: UUID, appleName: PersonNameComponents?) async {
-        // Check if profile already exists
+    private func ensureUserProfile(session: Session) async {
         let existing = try? await supabase
             .from("users")
             .select()
-            .eq("id", value: userId.uuidString)
+            .eq("id", value: session.user.id.uuidString)
             .limit(1)
             .execute()
 
-        // Non-empty response means user already exists
         if let data = existing?.data, !data.isEmpty, data != Data("[]".utf8) {
             return
         }
 
-        // New user — create profile
         let emojis = ["😊","🌊","🎸","🌿","🚀","🎯","🦊","🌙","⚡️","🎨"]
         let profile: [String: String] = [
-            "id": userId.uuidString,
-            "username": AuthManager.usernameFrom(appleName: appleName),
+            "id": session.user.id.uuidString,
+            "username": AuthManager.usernameFrom(email: session.user.email ?? ""),
             "avatar_emoji": emojis.randomElement() ?? "😊",
             "bio": ""
         ]
@@ -93,9 +86,8 @@ final class AuthManager: NSObject, ObservableObject {
             .insert(profile)
             .execute()
 
-        // Clear prototype data if needed
         let user = User(
-            id: userId.uuidString,
+            id: session.user.id.uuidString,
             username: profile["username"] ?? "user",
             avatarEmoji: profile["avatar_emoji"] ?? "😊",
             bio: ""
@@ -103,40 +95,5 @@ final class AuthManager: NSObject, ObservableObject {
         if AppStorage.shared.currentUser.id == "current-user" {
             AppStorage.shared.resetForNewUser(user: user)
         }
-    }
-}
-
-// MARK: - ASAuthorizationControllerDelegate
-
-extension AuthManager: ASAuthorizationControllerDelegate {
-    func authorizationController(
-        controller: ASAuthorizationController,
-        didCompleteWithAuthorization authorization: ASAuthorization
-    ) {
-        guard
-            let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
-            let nonce = currentNonce,
-            let tokenData = credential.identityToken,
-            let idToken = String(data: tokenData, encoding: .utf8)
-        else { return }
-
-        Task {
-            do {
-                let session = try await supabase.auth.signInWithIdToken(
-                    credentials: .init(provider: .apple, idToken: idToken, nonce: nonce)
-                )
-                await ensureUserProfile(userId: session.user.id, appleName: credential.fullName)
-                self.session = session
-            } catch {
-                print("[AuthManager] Sign-in error: \(error)")
-            }
-        }
-    }
-
-    func authorizationController(
-        controller: ASAuthorizationController,
-        didCompleteWithError error: Error
-    ) {
-        print("[AuthManager] Apple Sign-In cancelled or failed: \(error)")
     }
 }

@@ -3,37 +3,26 @@ import XCTest
 
 final class AuthTests: XCTestCase {
 
-    func test_usernameFromAppleName_fullName() {
-        var c = PersonNameComponents()
-        c.givenName = "Alice"
-        c.familyName = "Smith"
-        XCTAssertEqual(AuthManager.usernameFrom(appleName: c), "alicesmith")
+    func test_usernameFromEmail_basic() {
+        XCTAssertEqual(AuthManager.usernameFrom(email: "alice@example.com"), "alice")
     }
 
-    func test_usernameFromAppleName_givenNameOnly() {
-        var c = PersonNameComponents()
-        c.givenName = "Bob"
-        XCTAssertEqual(AuthManager.usernameFrom(appleName: c), "bob")
+    func test_usernameFromEmail_numbersAllowed() {
+        XCTAssertEqual(AuthManager.usernameFrom(email: "user123@test.com"), "user123")
     }
 
-    func test_usernameFromAppleName_nilComponents() {
-        let result = AuthManager.usernameFrom(appleName: nil)
+    func test_usernameFromEmail_specialCharsStripped() {
+        XCTAssertEqual(AuthManager.usernameFrom(email: "john.doe+tag@example.com"), "johndoetag")
+    }
+
+    func test_usernameFromEmail_emptyEmail() {
+        let result = AuthManager.usernameFrom(email: "")
         XCTAssertTrue(result.hasPrefix("user"))
-        XCTAssertEqual(result.count, 8) // "user" + 4 digits
+        XCTAssertEqual(result.count, 8)
     }
 
-    func test_usernameFromAppleName_specialChars() {
-        var c = PersonNameComponents()
-        c.givenName = "Jean-Pierre"
-        c.familyName = "O'Brien"
-        XCTAssertEqual(AuthManager.usernameFrom(appleName: c), "jeanpierreobrien")
-    }
-
-    func test_usernameFromAppleName_truncatesAt20() {
-        var c = PersonNameComponents()
-        c.givenName = "Alexandrina"
-        c.familyName = "Bartholomew"
-        let result = AuthManager.usernameFrom(appleName: c)
+    func test_usernameFromEmail_truncatesAt20() {
+        let result = AuthManager.usernameFrom(email: "verylongusernamethatexceedslimit@example.com")
         XCTAssertLessThanOrEqual(result.count, 20)
     }
 }

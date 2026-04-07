@@ -10,6 +10,9 @@ struct SocialBingoApp: App {
             ContentView()
                 .environmentObject(storage)
                 .environmentObject(authManager)
+                .onOpenURL { url in
+                    authManager.handleURL(url)
+                }
         }
     }
 }

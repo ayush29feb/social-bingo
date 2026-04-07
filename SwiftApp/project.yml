@@ -23,6 +23,9 @@ targets:
         UILaunchStoryboardName: ""
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
+        CFBundleURLTypes:
+          - CFBundleURLSchemes:
+              - socialbingo
     dependencies:
       - package: Supabase
         product: Supabase
