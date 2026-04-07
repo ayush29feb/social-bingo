@@ -33,6 +33,13 @@ struct ContentView: View {
                     Label("Notifications", systemImage: "bell")
                 }
                 .badge(getUnreadCount())
+
+            if #available(iOS 26, *) {
+                ChatView()
+                    .tabItem {
+                        Label("Chat", systemImage: "bubble.left.and.bubble.right")
+                    }
+            }
         }
         .tint(.appPrimary)
     }
