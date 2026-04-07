@@ -35,7 +35,7 @@ final class ChatViewModel: ObservableObject {
             let stream = session.streamResponse(to: text)
             for try await partialText in stream {
                 // Foundation Models stream yields cumulative text, not deltas — assignment is correct
-                messages[assistantIndex].content = partialText
+                messages[assistantIndex].content = partialText.content
             }
             messages[assistantIndex].isStreaming = false
         } catch {
