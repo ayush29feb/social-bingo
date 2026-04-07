@@ -22,19 +22,19 @@ final class ChatViewModel: ObservableObject {
 
     func sendMessage() async {
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty, !isStreaming, session != nil else { return }
+        guard !text.isEmpty, !isStreaming, let session else { return }
 
         inputText = ""
         messages.append(ChatMessage(role: .user, content: text))
 
-        var assistantMessage = ChatMessage(role: .assistant, content: "", isStreaming: true)
-        messages.append(assistantMessage)
+        messages.append(ChatMessage(role: .assistant, content: "", isStreaming: true))
         let assistantIndex = messages.count - 1
         isStreaming = true
 
         do {
-            let stream = session!.streamResponse(to: text)
+            let stream = session.streamResponse(to: text)
             for try await partialText in stream {
+                // Foundation Models stream yields cumulative text, not deltas — assignment is correct
                 messages[assistantIndex].content = partialText
             }
             messages[assistantIndex].isStreaming = false
